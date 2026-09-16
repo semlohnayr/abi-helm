@@ -1,0 +1,23 @@
+{{- range $pool := .Values.nodePools }}
+{{- $count := int $pool.count }}
+{{- range $i := until $count }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ $.Values.clusterName }}-{{ $pool.name }}-{{ $i }}-root-disk
+  namespace: {{ $.Values.clusterName }}
+  labels:
+    app.kubernetes.io/managed-by: Helm
+    cluster: {{ $.Values.clusterName }}
+    role: {{ $pool.name }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Block
+  resources:
+    requests:
+      storage: {{ $pool.diskSize | default $.Values.storage.defaultDiskSize | default "120Gi" }}
+  storageClassName: {{ $.Values.storage.className }}
+{{- end }}
+{{- end }}

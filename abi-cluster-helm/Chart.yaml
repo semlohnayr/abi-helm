@@ -1,0 +1,5 @@
+apiVersion: v2
+name: abi-cluster-helm
+description: A Helm Chart to render a Virtualized (non hcp) OCP on OCP cluster
+type: application
+version: 1.0.0

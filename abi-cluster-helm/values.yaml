@@ -1,0 +1,43 @@
+clusterName:
+pullSecret:
+baseDomain:
+clusterVersion:
+imageRegistry: quay.io
+apiVips: []
+ingressVips: []
+machineNetworkCidr:
+clusterNetworkCidr:
+clusterNetworkHostPrefix: 23
+serviceNetworkCidr:
+controlPlaneAgents:
+workerAgents:
+sshPublicKey:
+
+isoUrl: "" # FIXME: figure out if there's a way to build this without the API key
+certConfigMap: ""
+
+storage:
+  className: ""
+  defaultDiskSize: "120Gi"
+  isoDiskSize: "2Gi"
+
+network:
+  multusNetworkName: ""
+
+# Dynamic Node Pools
+nodePools:
+  - name: "master"
+    count: 3
+    cpuCores: 6
+    memory: "32Gi"
+    diskSize: "120Gi"
+  - name: "infra"
+    count: 2
+    cpuCores: 6
+    memory: "32Gi"
+    diskSize: "120Gi"
+  - name: "worker"
+    count: 2
+    cpuCores: 4
+    memory: "16Gi"
+    diskSize: "120Gi"

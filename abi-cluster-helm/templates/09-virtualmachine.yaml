@@ -1,0 +1,73 @@
+{{- range $pool := .Values.nodePools }}
+{{- $count := int $pool.count }}
+{{- range $i := until $count }}
+---
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: {{ $.Values.clusterName }}-{{ $pool.name }}-{{ $i }}
+  namespace: {{ $.Values.clusterName }}
+  labels:
+    role: {{ $pool.name }}
+    cluster: {{ $.Values.clusterName }}
+    infraenv: {{ $.Values.clusterName }}-infra
+    app.kubernetes.io/managed-by: Helm
+spec:
+  running: true
+  dataVolumeTemplates:
+    - metadata:
+        name: {{ $.Values.clusterName }}-{{ $pool.name }}-{{ $i }}-iso-dv
+      spec:
+        source:
+          http:
+            url: # FIXME
+            {{- if $.Values.certConfigMap }}
+            certConfigMap: {{ $.Values.certConfigMap | quote }}
+            {{- end }}
+        pvc:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: {{ $.Values.storage.isoDiskSize | default "2Gi" }}
+          {{- if $.Values.storage.className }}
+          storageClassName: {{ $.Values.storage.className }}
+          {{- end }}
+  template:
+    metadata:
+      labels:
+        kubevirt.io/domain: {{ $.Values.clusterName }}-{{ $pool.name }}-{{ $i }}
+        infraenv: {{ $.Values.clusterName }}-infra
+    spec:
+      domain:
+        cpu:
+          cores: {{ $pool.cpuCores | default 4 }}
+        resources:
+          requests:
+            memory: {{ $pool.memory | default "16Gi" }}
+        devices:
+          disks:
+            - name: discovery-iso
+              bootOrder: 1
+              cdrom:
+                bus: sata
+            - name: root-disk
+              bootOrder: 2
+              disk:
+                bus: virtio
+          interfaces:
+            - name: default
+              bridge: {}
+      networks:
+        - name: default
+          multus:
+            networkName: {{ $.Values.network.multusNetworkName | quote }}
+      volumes:
+        - name: root-disk
+          persistentVolumeClaim:
+            claimName: {{ $.Values.clusterName }}-{{ $pool.name }}-{{ $i }}-root-disk
+        - name: discovery-iso
+          dataVolume:
+            name: {{ $.Values.clusterName }}-{{ $pool.name }}-{{ $i }}-iso-dv
+{{- end }}
+{{- end }}
