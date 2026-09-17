@@ -1,4 +1,6 @@
 kind: Namespace
 apiVersion: v1
+labels:
+  vlans: all
 metadata:
   name: {{ .Values.clusterName }}
