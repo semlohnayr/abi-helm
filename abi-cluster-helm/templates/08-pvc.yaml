@@ -13,7 +13,7 @@ metadata:
     role: {{ $pool.name }}
 spec:
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   volumeMode: Block
   resources:
     requests:

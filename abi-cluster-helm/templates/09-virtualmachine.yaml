@@ -14,19 +14,21 @@ metadata:
     app.kubernetes.io/managed-by: Helm
 spec:
   running: true
+  evictionStrategy: LiveMigrate
   dataVolumeTemplates:
     - metadata:
         name: {{ $.Values.clusterName }}-{{ $pool.name }}-{{ $i }}-iso-dv
       spec:
         source:
           http:
-            url: # FIXME
+            url: {{ $.Values.isoUrl | quote }}
             {{- if $.Values.certConfigMap }}
             certConfigMap: {{ $.Values.certConfigMap | quote }}
             {{- end }}
         pvc:
           accessModes:
-            - ReadWriteOnce
+            - ReadWriteMany
+          volumeMode: Block
           resources:
             requests:
               storage: {{ $.Values.storage.isoDiskSize | default "2Gi" }}
@@ -39,6 +41,7 @@ spec:
         kubevirt.io/domain: {{ $.Values.clusterName }}-{{ $pool.name }}-{{ $i }}
         infraenv: {{ $.Values.clusterName }}-infra
     spec:
+      evictionStrategy: LiveMigrate
       domain:
         cpu:
           cores: {{ $pool.cpuCores | default 4 }}
